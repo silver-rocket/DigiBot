@@ -28,8 +28,6 @@ Widget::Widget(QWidget *parent) :
     connect(ui->webView, SIGNAL(urlChanged(QUrl)), this, SLOT(check_url(QUrl)));
     */
 
-
-
 }
 
 Widget::~Widget()
@@ -51,7 +49,7 @@ void Widget::check_url(QUrl url) {
     }
 
     qDebug() << "Token: " << token << '\n';
-*/
+    */
 }
 
 void Widget::readIRCData() {
@@ -96,42 +94,40 @@ void Widget::readIRCData() {
         readIRCData();
 }
 
-QByteArray Widget::GET(QUrl u)
-{
-    QNetworkAccessManager* manager = new QNetworkAccessManager(this);
-
-    QNetworkRequest req(u);
-    req.setRawHeader("Accept", "application/vnd.twitchtv.v3+json");
-    req.setRawHeader("Authorization", "OAuth " + ui->authTokenEdit->text().toLatin1());
-    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded" );
-
-    QNetworkReply* reply = manager->get(req);
-    QEventLoop wait; // ждем ответа от сервера
-    connect(manager, SIGNAL(finished(QNetworkReply*)),&wait, SLOT(quit())); //соеденяем сигнал менеджера со слотом лупа
-    QTimer::singleShot(10000, &wait,SLOT(quit())); // ждем еще 10 сек ответа
-    wait.exec();
-    QByteArray answer = reply->readAll(); // считываем ответ
-    reply->deleteLater();
-    return answer;
-}
-
 void Widget::on_pushButton_clicked()
 {
+    int n = 10;
+    QList<QString> last_followers = twitchAPI.getLastFollowers(currentStreamName, ui->authTokenEdit->text(), n);
+
+    if (last_followers.size() != n) {
+        _log("Can't retrieve last followers. Check stream connection.", Qt::red);
+    }
+    else {
+        ui->lastFollowers->clear();
+        for (int i=0; i<n; i++) {
+            ui->lastFollowers->addItem(last_followers[i]);
+        }
+    }
+
+    return;
+
     //QUrl current("https://api.twitch.tv/kraken/streams/followed");
     //QUrl current("https://api.twitch.tv/kraken/user");
-    QUrl current("https://api.twitch.tv/kraken/streams/starladder4");
-    //QUrl current("https://api.twitch.tv/kraken/channels/Starladder1/follows");
+    //QUrl current("https://api.twitch.tv/kraken/streams/starladder4");
+    QUrl current("https://api.twitch.tv/kraken/channels/Starladder1/follows");
     //QUrl current("https://api.twitch.tv/kraken/channels/thewide001/subscriptions");
 
     QUrlQuery param;
     param.addQueryItem("limit", "3");
     current.setQuery(param);
 
-    QByteArray answer = GET(current);
+    QByteArray answer = twitchAPI.GET(current, ui->authTokenEdit->text());
 
     QJsonDocument jsonResponse = QJsonDocument::fromJson(answer);
 
     QJsonObject jsonObj = jsonResponse.object();
+
+    qDebug() << jsonObj["follows"].toArray();
 
     for(QJsonObject::const_iterator iter = jsonObj.begin(); iter != jsonObj.end(); ++iter) {
 
@@ -167,7 +163,8 @@ void Widget::on_chatDisconnectButton_clicked()
 
 void Widget::onTimerTimeout() {
 
-    QMap<QString, QString> stream_info = getStreamInfo(currentStreamName);
+    //QMap<QString, QString> stream_info = getStreamInfo(currentStreamName);
+    QMap<QString, QString> stream_info = twitchAPI.getStreamInfo(currentStreamName, ui->authTokenEdit->text());
 
     if (stream_info["offline"] == "true") {
         streamInfoTimer->stop();
@@ -235,7 +232,7 @@ void Widget::on_getAuthButton_clicked()
     query.addQueryItem("response_type", "token");
     query.addQueryItem("client_id", "jv1zuv3ifjgbt45ubipfk1ng7khpnhi");
     query.addQueryItem("redirect_uri", "http://oauth.abyle.org/");
-    query.addQueryItem("scope", "user_read+channel_read+user_follows_edit+channel_subscriptions+chat_login");
+    query.addQueryItem("scope", scope);
 
     url.setQuery(query);
 
@@ -324,41 +321,12 @@ void Widget::connect_to_chat()
     socket->write("JOIN #" + ui->channelEdit->text().toUtf8() + "\r\n");
 }
 
-QMap<QString, QString> Widget::getStreamInfo(const QString & channel)
-{
-    QUrl current("https://api.twitch.tv/kraken/streams/" + channel);
-
-    QByteArray answer = GET(current);
-
-    QJsonDocument jsonResponse = QJsonDocument::fromJson(answer);
-
-    QJsonObject jsonObj = jsonResponse.object();
-
-    QString viewers = "0";
-    QString fps = "0";
-
-    QMap<QString, QString> ret_map;
-
-    ret_map["offline"] = "false";
-
-    if (!jsonObj["stream"].toObject().isEmpty()) {
-        viewers = QString::number(jsonObj["stream"].toObject()["viewers"].toInt());
-        fps = QString::number(jsonObj["stream"].toObject()["average_fps"].toDouble());
-    } else {
-        ret_map["offline"] = "true";
-    }
-
-    ret_map["viewers"] = viewers;
-    ret_map["average_fps"] = fps;
-
-    return ret_map;
-}
-
 void Widget::connect_to_stream()
 {
     _log("Connecting to " + ui->channelEdit->text() + " stream...");
 
-    QMap<QString, QString> stream_info = getStreamInfo(ui->channelEdit->text());
+    //QMap<QString, QString> stream_info = getStreamInfo(ui->channelEdit->text());
+    QMap<QString, QString> stream_info = twitchAPI.getStreamInfo(ui->channelEdit->text(), ui->authTokenEdit->text());
 
     if (stream_info["offline"] == "false") {
         ui->streamOnlineLabel->setStyleSheet("QLabel { background-color : rgb(0,255,0); color : blue; font: 10pt \"MS Shell Dlg 2\"; }");

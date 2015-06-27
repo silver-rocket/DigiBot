@@ -9,7 +9,6 @@
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
 #include <QTimer>
-#include <QList>
 #include <QJsonValue>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -19,11 +18,14 @@
 #include <QFile>
 #include <QXmlStreamWriter>
 #include <QMap>
+#include <QList>
 #include <QMessageBox>
 #include <QListWidget>
 
 #include "ircmsgparser.h"
 #include "simplexmlreadwrite.h"
+#include "twitchapi.h"
+#include "botengine.h"
 
 namespace Ui {
     class Widget;
@@ -58,17 +60,15 @@ private:
     QString currentStreamName;
     QString currentChatName;
 
-private:
+    TwitchAPI twitchAPI;
 
-    QByteArray GET(QUrl r);
+private:
 
     void load_settings();
     void load_QA();
 
     void _log(QString string, Qt::GlobalColor color = Qt::white);
     void _chat(QString string);
-
-    QMap<QString, QString> getStreamInfo(const QString & channel);
 
     void connect_to_chat();
     void connect_to_stream();

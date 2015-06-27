@@ -246,7 +246,7 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -454,14 +454,24 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
     <widget class="QPushButton" name="pushButton">
      <property name="geometry">
       <rect>
-       <x>500</x>
-       <y>240</y>
+       <x>520</x>
+       <y>90</y>
        <width>191</width>
        <height>51</height>
       </rect>
      </property>
      <property name="text">
-      <string>Test API</string>
+      <string>Last 10 followers</string>
+     </property>
+    </widget>
+    <widget class="QListWidget" name="lastFollowers">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>160</y>
+       <width>151</width>
+       <height>141</height>
+      </rect>
      </property>
     </widget>
    </widget>
@@ -469,6 +479,29 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
     <attribute name="title">
      <string>Bot management</string>
     </attribute>
+    <widget class="QListWidget" name="listWidget">
+     <property name="geometry">
+      <rect>
+       <x>520</x>
+       <y>130</y>
+       <width>181</width>
+       <height>231</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_2">
+     <property name="geometry">
+      <rect>
+       <x>350</x>
+       <y>130</y>
+       <width>141</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>PushButton</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QGroupBox" name="chatBox">
