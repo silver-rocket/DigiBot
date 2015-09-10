@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Settings>
+    <about>
+        <IsOn>false</IsOn>
+        <Message>@Sender, see https://github.com/degot88/DigiBot</Message>
+        <MinDelayMsec>5000</MinDelayMsec>
+    </about>
+    <help>
+        <IsOn>false</IsOn>
+        <Message>!help !uptime !delay !about !joke !snowball %person% !dong</Message>
+        <MinDelayMsec>5000</MinDelayMsec>
+    </help>
+    <rand>
+        <IsOn>true</IsOn>
+        <Message>@Sender, your lucky number is rand(0,100) Kreygasm</Message>
+        <MinDelayMsec>500</MinDelayMsec>
+    </rand>
+</Settings>

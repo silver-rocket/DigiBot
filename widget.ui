@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>780</width>
-    <height>741</height>
+    <height>606</height>
    </rect>
   </property>
   <property name="font">
@@ -26,7 +26,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>550</y>
+     <y>420</y>
      <width>761</width>
      <height>171</height>
     </rect>
@@ -153,7 +153,7 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QPushButton" name="reconnectToStreamButton">
+   <widget class="QPushButton" name="updateStreamStateButton">
     <property name="geometry">
      <rect>
       <x>140</x>
@@ -242,7 +242,7 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
      <x>10</x>
      <y>100</y>
      <width>761</width>
-     <height>441</height>
+     <height>301</height>
     </rect>
    </property>
    <property name="currentIndex">
@@ -332,6 +332,9 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
       <property name="text">
        <string>Connect</string>
       </property>
+      <property name="autoDefault">
+       <bool>false</bool>
+      </property>
      </widget>
      <widget class="QPushButton" name="getAuthButton">
       <property name="geometry">
@@ -420,43 +423,215 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
       </property>
      </widget>
     </widget>
-    <widget class="QPushButton" name="chatDisconnectButton">
-     <property name="geometry">
-      <rect>
-       <x>30</x>
-       <y>360</y>
-       <width>101</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Chat Disconnect</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="chatConnectButton">
-     <property name="geometry">
-      <rect>
-       <x>30</x>
-       <y>330</y>
-       <width>101</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Chat Connect</string>
-     </property>
-    </widget>
    </widget>
    <widget class="QWidget" name="tab_2">
     <attribute name="title">
-     <string>API test</string>
+     <string>Bot Settings</string>
+    </attribute>
+    <widget class="QTabWidget" name="tabWidget_2">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>15</y>
+       <width>471</width>
+       <height>239</height>
+      </rect>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tab_4">
+      <attribute name="title">
+       <string>Predefined commands</string>
+      </attribute>
+      <widget class="QPushButton" name="pushButton_4">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>30</y>
+         <width>21</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>+</string>
+       </property>
+      </widget>
+      <widget class="QTableWidget" name="commandsTable">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>5</y>
+         <width>311</width>
+         <height>201</height>
+        </rect>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::NoSelection</enum>
+       </property>
+       <column>
+        <property name="text">
+         <string>Command</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>On/Off</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Min Delay (msec)</string>
+        </property>
+       </column>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="tab_5">
+      <attribute name="title">
+       <string>Custom commands</string>
+      </attribute>
+      <widget class="QTableWidget" name="customCommandsTable">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>5</y>
+         <width>421</width>
+         <height>201</height>
+        </rect>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::NoSelection</enum>
+       </property>
+       <column>
+        <property name="text">
+         <string>Command</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>On/Off</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Min Delay (msec)</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Message</string>
+        </property>
+       </column>
+      </widget>
+      <widget class="QPushButton" name="pushButton_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>21</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>+</string>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="announcementBox">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>10</y>
+       <width>221</width>
+       <height>111</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Announcement</string>
+     </property>
+     <widget class="QTextEdit" name="announcementTextEdit">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>201</width>
+        <height>51</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="repeatAnnouncementCheckBox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>82</y>
+        <width>70</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Repeat</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="sendStopAnnouncementButton">
+      <property name="geometry">
+       <rect>
+        <x>137</x>
+        <y>79</y>
+        <width>71</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Send</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="announcementRepeatTime">
+      <property name="geometry">
+       <rect>
+        <x>80</x>
+        <y>80</y>
+        <width>51</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>9999</number>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab_3">
+    <attribute name="title">
+     <string>Test Twitch API</string>
     </attribute>
     <widget class="QPushButton" name="pushButton">
      <property name="geometry">
       <rect>
-       <x>520</x>
-       <y>90</y>
-       <width>191</width>
+       <x>240</x>
+       <y>40</y>
+       <width>201</width>
        <height>51</height>
       </rect>
      </property>
@@ -467,40 +642,60 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
     <widget class="QListWidget" name="lastFollowers">
      <property name="geometry">
       <rect>
-       <x>560</x>
-       <y>160</y>
-       <width>151</width>
+       <x>260</x>
+       <y>110</y>
+       <width>171</width>
        <height>141</height>
       </rect>
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="tab_3">
+   <widget class="QWidget" name="tab_8">
     <attribute name="title">
-     <string>Bot management</string>
+     <string>Subscriber Actions</string>
     </attribute>
-    <widget class="QListWidget" name="listWidget">
+    <widget class="QGroupBox" name="greetingNewSubBox">
      <property name="geometry">
       <rect>
-       <x>520</x>
-       <y>130</y>
-       <width>181</width>
-       <height>231</height>
+       <x>20</x>
+       <y>20</y>
+       <width>201</width>
+       <height>81</height>
       </rect>
      </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_2">
-     <property name="geometry">
-      <rect>
-       <x>350</x>
-       <y>130</y>
-       <width>141</width>
-       <height>51</height>
-      </rect>
+     <property name="title">
+      <string/>
      </property>
-     <property name="text">
-      <string>PushButton</string>
-     </property>
+     <widget class="QTextEdit" name="greetingMsgTextEdit">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>181</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="html">
+       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;@sub, thanks for (re)subscribing, mate!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="greetNewSubCheckBox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>151</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Greet new subscriber</string>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>
@@ -545,8 +740,68 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
     </property>
    </widget>
   </widget>
+  <widget class="QLabel" name="aboutLabel">
+   <property name="geometry">
+    <rect>
+     <x>766</x>
+     <y>1</y>
+     <width>13</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>https://github.com/degot88/DigiBot</string>
+   </property>
+   <property name="statusTip">
+    <string/>
+   </property>
+   <property name="whatsThis">
+    <string/>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="pixmap">
+    <pixmap resource="resources.qrc">:/pic/question_mark.png</pixmap>
+   </property>
+   <property name="scaledContents">
+    <bool>true</bool>
+   </property>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>connectButton</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>forceReconnectBox</tabstop>
+  <tabstop>updateStreamStateButton</tabstop>
+  <tabstop>authTokenEdit</tabstop>
+  <tabstop>channelEdit</tabstop>
+  <tabstop>log</tabstop>
+  <tabstop>getAuthButton</tabstop>
+  <tabstop>usernameEdit</tabstop>
+  <tabstop>chat</tabstop>
+  <tabstop>saveButton</tabstop>
+  <tabstop>customCommandsTable</tabstop>
+  <tabstop>pushButton_2</tabstop>
+  <tabstop>pushButton</tabstop>
+  <tabstop>lastFollowers</tabstop>
+  <tabstop>tabWidget_2</tabstop>
+  <tabstop>pushButton_4</tabstop>
+  <tabstop>commandsTable</tabstop>
+  <tabstop>announcementTextEdit</tabstop>
+  <tabstop>repeatAnnouncementCheckBox</tabstop>
+  <tabstop>announcementRepeatTime</tabstop>
+  <tabstop>sendStopAnnouncementButton</tabstop>
+  <tabstop>greetNewSubCheckBox</tabstop>
+  <tabstop>greetingMsgTextEdit</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>

@@ -9,14 +9,12 @@ class IRCMsgParser
 {
 public:
 
-    enum IRCMsgType { JOIN, PART, PRIVMSG, PING, UNSUPPORTED };
+    enum IRCMsgType { WELCOME, JOIN, PART, PRIVMSG, PING, UNSUPPORTED, ERR_AUTH_TOKEN, ERR_LOGIN };
 
     struct IRCMsg {
-
         IRCMsgType type;
         QString sender;
         QString text;
-
     };
 
     IRCMsgParser();

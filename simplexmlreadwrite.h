@@ -11,15 +11,12 @@
 
 class SimpleXMLReadWrite
 {
-    QString fname;
-
 public:
-    SimpleXMLReadWrite(const QString& _fname);
-    ~SimpleXMLReadWrite();
 
-    bool writeFile(const QMap<QString, QString>& map);
-    QMap<QString, QString> readFile();
-
+    static QMap<QString, QString> readNonIerarchy(const QString& fname);
+    static bool writeNonIerarchy(const QMap<QString, QString>& map, const QString& fname);
+    static QMap<QString, QMap<QString, QString> > readIerarchy(const QString& fname);
+    static bool writeIerarchy(const QMap<QString, QMap<QString, QString> >& map, const QString& fname);
 };
 
 #endif // SIMPLEXMLREADWRITE_H

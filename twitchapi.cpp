@@ -1,21 +1,19 @@
 #include "twitchapi.h"
 
-TwitchAPI::TwitchAPI(QWidget *parent) : QWidget(parent)
-{
-
+TwitchAPI & TwitchAPI::instance() {
+    static TwitchAPI inst;
+    return inst;
 }
 
-TwitchAPI::~TwitchAPI()
-{
-
+void TwitchAPI::set_auth_token(const QString& tok) {
+   auth_token = tok;
 }
 
-
-QMap<QString, QString> TwitchAPI::getStreamInfo(const QString & channel, const QString & auth_token)
+QMap<QString, QString> TwitchAPI::getStreamInfo(const QString & channel)
 {
     QUrl current("https://api.twitch.tv/kraken/streams/" + channel);
 
-    QByteArray answer = GET(current, auth_token);
+    QByteArray answer = GET(current);
 
     QJsonDocument jsonResponse = QJsonDocument::fromJson(answer);
 
@@ -23,6 +21,8 @@ QMap<QString, QString> TwitchAPI::getStreamInfo(const QString & channel, const Q
 
     QString viewers = "0";
     QString fps = "0";
+    QString created_at = "0";
+    QString delay = "0";
 
     QMap<QString, QString> ret_map;
 
@@ -31,36 +31,58 @@ QMap<QString, QString> TwitchAPI::getStreamInfo(const QString & channel, const Q
     if (!jsonObj["stream"].toObject().isEmpty()) {
         viewers = QString::number(jsonObj["stream"].toObject()["viewers"].toInt());
         fps = QString::number(jsonObj["stream"].toObject()["average_fps"].toDouble());
+        created_at = jsonObj["stream"].toObject()["created_at"].toString();
+        delay = QString::number(jsonObj["stream"].toObject()["channel"].toObject()["delay"].toDouble());
     } else {
         ret_map["offline"] = "true";
     }
 
     ret_map["viewers"] = viewers;
     ret_map["average_fps"] = fps;
+    ret_map["created_at"] = created_at;
+    ret_map["delay"] = delay;
 
     return ret_map;
 }
 
-QByteArray TwitchAPI::GET(QUrl u, const QString & auth_token)
+QTime TwitchAPI::getStreamUptime(const QString & channel)
 {
-    QNetworkAccessManager* manager = new QNetworkAccessManager(this);
+    QMap<QString, QString> info = getStreamInfo(channel);
 
-    QNetworkRequest req(u);
-    req.setRawHeader("Accept", "application/vnd.twitchtv.v3+json");
-    req.setRawHeader("Authorization", "OAuth " + auth_token.toLatin1());
-    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded" );
+    if (info["offline"] == "true")
+        return QTime();
 
-    QNetworkReply* reply = manager->get(req);
-    QEventLoop wait;
-    connect(manager, SIGNAL(finished(QNetworkReply*)), &wait, SLOT(quit()));
-    QTimer::singleShot(10000, &wait, SLOT(quit()));
-    wait.exec();
-    QByteArray answer = reply->readAll();
-    reply->deleteLater();
-    return answer;
+    QRegExp time_regex("(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2})Z");
+
+    bool ok = time_regex.exactMatch(info["created_at"]);
+
+    if (!ok)
+        return QTime();
+
+    QDateTime start_time(QDate(time_regex.cap(1).toInt(),time_regex.cap(2).toInt(), time_regex.cap(3).toInt()), QTime(time_regex.cap(4).toInt(),time_regex.cap(5).toInt(), time_regex.cap(6).toInt()), QTimeZone::utc());
+
+    qint64 elapsed_ms = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch() - start_time.toMSecsSinceEpoch();
+
+    int hours = int(elapsed_ms/1000./60./60); // % 24 ?
+    int mins = int(elapsed_ms/1000./60) % 60;
+    int secs = (elapsed_ms/1000) % 60;
+
+    QTime elapsed(hours, mins, secs);
+
+    return elapsed;
 }
 
-QList<QString> TwitchAPI::getLastFollowers(const QString & channel, const QString & auth_token, int nFollowers)
+int TwitchAPI::getStreamDelay(const QString & channel)
+{
+    QMap<QString, QString> info = getStreamInfo(channel);
+
+    if (info["offline"] == "true")
+        return -1;
+
+    return info["delay"].toInt();
+}
+
+QList<QString> TwitchAPI::getLastFollowers(const QString & channel, int nFollowers)
 {
     QUrl current("https://api.twitch.tv/kraken/channels/" + channel + "/follows");
 
@@ -71,7 +93,7 @@ QList<QString> TwitchAPI::getLastFollowers(const QString & channel, const QStrin
     param.addQueryItem("limit", QString::number(nFollowers));
     current.setQuery(param);
 
-    QByteArray answer = GET(current, auth_token);
+    QByteArray answer = GET(current);
 
     QJsonDocument jsonResponse = QJsonDocument::fromJson(answer);
 

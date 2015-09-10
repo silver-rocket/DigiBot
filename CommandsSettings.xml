@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Settings>
+    <dong>
+        <IsOn>true</IsOn>
+        <MinDelayMsec>2000</MinDelayMsec>
+    </dong>
+    <up>
+        <IsOn>true</IsOn>
+        <MinDelayMsec>5000</MinDelayMsec>
+    </up>
+    <delay>
+        <IsOn>true</IsOn>
+        <MinDelayMsec>5000</MinDelayMsec>
+    </delay>
+</Settings>

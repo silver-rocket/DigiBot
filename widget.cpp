@@ -2,6 +2,10 @@
 #include "ui_widget.h"
 
 const QString Widget::mainWindowTitle = "Digibot v 1.0.0";
+const QString Widget::appID = "jv1zuv3ifjgbt45ubipfk1ng7khpnhi";
+const QString Widget::settingsFile = "DigiBotSettings.xml";
+const QString Widget::commandsSettingsFile = "CommandsSettings.xml";
+const QString Widget::customCommandsFile = "CustomCommandsSettings.xml";
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
@@ -11,8 +15,10 @@ Widget::Widget(QWidget *parent) :
 
     setWindowTitle(mainWindowTitle);
 
-    load_settings();
-    load_QA();
+    load_common_settings();
+    load_commands_settings();
+    load_custom_commands_settings();
+    //load_QA();
 
     chatConnected = false;
     streamConnected = false;
@@ -20,84 +26,34 @@ Widget::Widget(QWidget *parent) :
     streamInfoTimer = new QTimer(this);
     connect(streamInfoTimer, SIGNAL(timeout()), this, SLOT(onTimerTimeout()));
 
-    socket = new QTcpSocket(this);
-    connect(socket, SIGNAL(readyRead()), this, SLOT(readIRCData()));
+    chat = new ChatEngine();
 
-    /*
-    ui->webView->load(url);
-    connect(ui->webView, SIGNAL(urlChanged(QUrl)), this, SLOT(check_url(QUrl)));
-    */
+    connect(chat, SIGNAL(newMessageReady(const IRCMsgParser::IRCMsg &)), this, SLOT(onNewChatMsg(const IRCMsgParser::IRCMsg &)));
 
+    bot = new BotEngine();
+
+    connect(bot, SIGNAL(botMessageReady(const QString &)), this, SLOT(onNewBotMsg(const QString &)));
+
+    TwitchAPI::instance().set_auth_token(ui->authTokenEdit->text());
+
+    bot->set_subs_greeting_state(ui->greetNewSubCheckBox->isChecked());
+    bot->set_subs_greeting_msg(ui->greetingMsgTextEdit->toPlainText());
+
+    //connect_to_chat();
 }
 
 Widget::~Widget()
 {
+    delete streamInfoTimer;
+    delete bot;
+    delete chat;
     delete ui;
-}
-
-void Widget::check_url(QUrl url) {
-
-    qDebug() << "URL:\n" << url.toString() << '\n';
-
-    /*
-    url = url.toString().replace("#","?");
-    QString token = url.queryItemValue("access_token");
-
-    if (token.isEmpty()) {
-        qDebug() << "Something went wrong.";
-        return;
-    }
-
-    qDebug() << "Token: " << token << '\n';
-    */
-}
-
-void Widget::readIRCData() {
-
-    QString line = socket->readLine();
-
-    if (line.contains("Welcome, GLHF")) {
-
-        _log("Connected to " + ui->channelEdit->text() + "'s chat succesfully!\n", Qt::green);
-        ui->chatConnectedLabel->setStyleSheet("QLabel { background-color : rgb(0,255,0); color : blue; font: 10pt \"MS Shell Dlg 2\"; }");
-        ui->chatConnectedLabel->setText("Connected");
-        chatConnected = true;
-        if (ui->channelEdit->text() != currentChatName) {
-            ui->chat->clear();
-        }
-        currentChatName = ui->channelEdit->text();
-        ui->chatBox->setTitle("Chat (Connected to " + currentChatName + ")");
-
-    } else if (line.contains("Login unsuccessful")) {
-        _log("Login unsuccessful. Possibly wrong oauth token.\n", Qt::red);
-    } else if (line.contains("Error logging in")) {
-        _log("Login unsuccesfull. Probably wrong username or channel name.\n", Qt::red);
-    }
-
-    IRCMsgParser::IRCMsg msg = IRCMsgParser::parse(line);
-
-    qDebug() << line;
-    //qDebug() << msg.type << ' ' << msg.sender << ' ' << msg.text;
-
-    if (msg.type == IRCMsgParser::PING)
-        socket->write(QString("PONG :" + msg.text).toLatin1());
-
-    if (msg.type == IRCMsgParser::JOIN) {
-        //socket->write(QString("PRIVMSG #" + ui->channelEdit->text() + " :" + msg.sender + ", SwiftRage / HELLO!\r\n").toLatin1());
-    }
-    if (msg.type == IRCMsgParser::PRIVMSG) {
-
-        _chat(msg.sender + ": " + msg.text.remove("\r\n"));
-
-    }
-    if(socket->canReadLine())
-        readIRCData();
 }
 
 void Widget::on_pushButton_clicked()
 {
     int n = 10;
-    QList<QString> last_followers = twitchAPI.getLastFollowers(currentStreamName, ui->authTokenEdit->text(), n);
+    QList<QString> last_followers = TwitchAPI::instance().getLastFollowers(currentStreamName, n);
 
     if (last_followers.size() != n) {
         _log("Can't retrieve last followers. Check stream connection.", Qt::red);
@@ -109,62 +65,11 @@ void Widget::on_pushButton_clicked()
         }
     }
 
-    return;
-
-    //QUrl current("https://api.twitch.tv/kraken/streams/followed");
-    //QUrl current("https://api.twitch.tv/kraken/user");
-    //QUrl current("https://api.twitch.tv/kraken/streams/starladder4");
-    QUrl current("https://api.twitch.tv/kraken/channels/Starladder1/follows");
-    //QUrl current("https://api.twitch.tv/kraken/channels/thewide001/subscriptions");
-
-    QUrlQuery param;
-    param.addQueryItem("limit", "3");
-    current.setQuery(param);
-
-    QByteArray answer = twitchAPI.GET(current, ui->authTokenEdit->text());
-
-    QJsonDocument jsonResponse = QJsonDocument::fromJson(answer);
-
-    QJsonObject jsonObj = jsonResponse.object();
-
-    qDebug() << jsonObj["follows"].toArray();
-
-    for(QJsonObject::const_iterator iter = jsonObj.begin(); iter != jsonObj.end(); ++iter) {
-
-        if (iter.key() == "follows") { // follows subscriptions
-
-            QJsonArray jsonObj2 = iter.value().toArray();
-
-            for(QJsonArray::const_iterator iter2 = jsonObj2.begin(); iter2 != jsonObj2.end(); ++iter2) {
-
-                QJsonObject jsonObj2 = (*iter2).toObject();
-                qDebug() << jsonObj2["user"].toObject()["display_name"].toString();
-                //qDebug() << '\n';
-
-            }
-
-        }
-
-    }
-
-    //qDebug() << answer;
-
 }
 
-void Widget::on_chatConnectButton_clicked()
+void Widget::onTimerTimeout()
 {
-    connect_to_chat();
-}
-
-void Widget::on_chatDisconnectButton_clicked()
-{
-    disconnect_from_chat();
-}
-
-void Widget::onTimerTimeout() {
-
-    //QMap<QString, QString> stream_info = getStreamInfo(currentStreamName);
-    QMap<QString, QString> stream_info = twitchAPI.getStreamInfo(currentStreamName, ui->authTokenEdit->text());
+    QMap<QString, QString> stream_info = TwitchAPI::instance().getStreamInfo(currentStreamName);
 
     if (stream_info["offline"] == "true") {
         streamInfoTimer->stop();
@@ -173,15 +78,51 @@ void Widget::onTimerTimeout() {
     ui->viewersLabel->setText(stream_info["viewers"]);
     ui->fpsLabel->setText(stream_info["average_fps"]);
 
+    //bot.showUptime(IRCMsgParser::IRCMsg());
 }
 
-void Widget::load_settings()
+void Widget::load_common_settings()
 {
-    SimpleXMLReadWrite xml("DigiBotSettings.xml");
-    settings = xml.readFile();
-    ui->channelEdit->setText(settings["Channel"]);
-    ui->usernameEdit->setText(settings["Username"]);
-    ui->authTokenEdit->setText(settings["Auth_token"]);
+    COMMON_SETTINGS = SimpleXMLReadWrite::readNonIerarchy(settingsFile);
+
+    ui->channelEdit->setText(COMMON_SETTINGS["Channel"]);
+    ui->usernameEdit->setText(COMMON_SETTINGS["Username"]);
+    ui->authTokenEdit->setText(COMMON_SETTINGS["Auth_token"]);
+}
+
+void Widget::load_commands_settings()
+{
+    COMMANDS_SETTINGS = SimpleXMLReadWrite::readIerarchy(commandsSettingsFile);
+
+    // visualize in table:
+    for (QMap<QString, QMap<QString, QString> >::iterator it = COMMANDS_SETTINGS.begin(); it != COMMANDS_SETTINGS.end(); ++it) {
+
+        QString command = it.key();
+        QMap<QString, QString> single_command_settings = it.value();
+        add_row_to_table(ui->commandsTable,
+                         command,
+                         single_command_settings["IsOn"],
+                         single_command_settings["MinDelayMsec"]);
+
+    }
+}
+
+void Widget::load_custom_commands_settings()
+{
+    CUSTOM_COMMANDS_SETTINGS = SimpleXMLReadWrite::readIerarchy(customCommandsFile);
+
+    // visualize in table:
+    for (QMap<QString, QMap<QString, QString> >::iterator it = CUSTOM_COMMANDS_SETTINGS.begin(); it != CUSTOM_COMMANDS_SETTINGS.end(); ++it) {
+
+        QString command = it.key();
+        QMap<QString, QString> single_command_settings = it.value();
+        add_row_to_table(ui->customCommandsTable,
+                         command,
+                         single_command_settings["IsOn"],
+                         single_command_settings["MinDelayMsec"],
+                         single_command_settings["Message"]);
+
+    }
 }
 
 void Widget::load_QA()
@@ -195,7 +136,7 @@ void Widget::load_QA()
 
     QTextStream stream(&file);
 
-    stream.setCodec("cp-1251");
+    stream.setCodec("cp-1251"); // russian support
 
     while(!stream.atEnd())
     {
@@ -219,6 +160,25 @@ void Widget::load_QA()
     file.close();
 }
 
+void Widget::save_common_settings()
+{
+    COMMON_SETTINGS["Username"] = ui->usernameEdit->text();
+    COMMON_SETTINGS["Channel"] = ui->channelEdit->text().toLower();
+    COMMON_SETTINGS["Auth_token"] = ui->authTokenEdit->text();
+
+    SimpleXMLReadWrite::writeNonIerarchy(COMMON_SETTINGS, settingsFile);
+}
+
+void Widget::save_commands_settings()
+{
+
+}
+
+void Widget::save_custom_commands_settings()
+{
+    SimpleXMLReadWrite::writeIerarchy(CUSTOM_COMMANDS_SETTINGS, customCommandsFile);
+}
+
 void Widget::on_getAuthButton_clicked()
 {
     QString auth_path = "https://api.twitch.tv/kraken/oauth2/authorize";
@@ -230,7 +190,7 @@ void Widget::on_getAuthButton_clicked()
     QUrlQuery query;
 
     query.addQueryItem("response_type", "token");
-    query.addQueryItem("client_id", "jv1zuv3ifjgbt45ubipfk1ng7khpnhi");
+    query.addQueryItem("client_id", appID);
     query.addQueryItem("redirect_uri", "http://oauth.abyle.org/");
     query.addQueryItem("scope", scope);
 
@@ -241,11 +201,9 @@ void Widget::on_getAuthButton_clicked()
 
 void Widget::on_saveButton_clicked()
 {
-    SimpleXMLReadWrite xml("DigiBotSettings.xml");
-    settings["Username"] = ui->usernameEdit->text();
-    settings["Channel"] = ui->channelEdit->text().toLower();
-    settings["Auth_token"] = ui->authTokenEdit->text();
-    xml.writeFile(settings);
+    save_common_settings();
+
+    save_custom_commands_settings();
 }
 
 void Widget::_log(QString string, Qt::GlobalColor color)
@@ -284,7 +242,7 @@ void Widget::_chat(QString string)
     ui->chat->setCurrentItem(item);
 }
 
-void Widget::on_reconnectToStreamButton_clicked()
+void Widget::on_updateStreamStateButton_clicked()
 {
     disconnect_from_stream();
     connect_to_stream();
@@ -314,19 +272,16 @@ void Widget::on_connectButton_clicked()
 void Widget::connect_to_chat()
 {
     _log("Connecting to " + ui->channelEdit->text() + " chat...");
-
-    socket->connectToHost(QString("irc.twitch.tv"), 6667);
-    socket->write("PASS oauth:" + ui->authTokenEdit->text().toUtf8() + "\r\n");
-    socket->write("NICK " + ui->usernameEdit->text().toUtf8() + "\r\n");
-    socket->write("JOIN #" + ui->channelEdit->text().toUtf8() + "\r\n");
+    chat->join(ui->authTokenEdit->text(), ui->usernameEdit->text(), ui->channelEdit->text());
+    chatConnected = true;
 }
 
 void Widget::connect_to_stream()
 {
-    _log("Connecting to " + ui->channelEdit->text() + " stream...");
+    _log("Checking " + ui->channelEdit->text() + " stream...");
 
-    //QMap<QString, QString> stream_info = getStreamInfo(ui->channelEdit->text());
-    QMap<QString, QString> stream_info = twitchAPI.getStreamInfo(ui->channelEdit->text(), ui->authTokenEdit->text());
+    TwitchAPI::instance().set_auth_token(ui->authTokenEdit->text());
+    QMap<QString, QString> stream_info = TwitchAPI::instance().getStreamInfo(ui->channelEdit->text());
 
     if (stream_info["offline"] == "false") {
         ui->streamOnlineLabel->setStyleSheet("QLabel { background-color : rgb(0,255,0); color : blue; font: 10pt \"MS Shell Dlg 2\"; }");
@@ -335,6 +290,7 @@ void Widget::connect_to_stream()
         streamInfoTimer->start(streamInfoTimerTimeout);
         streamConnected = true;
         currentStreamName = ui->channelEdit->text();
+        bot->set_cur_channel(currentStreamName); // .join channel
     } else {
         _log("Stream " + ui->channelEdit->text().toUtf8() + " is currently offline.", Qt::yellow);
         ui->streamOnlineLabel->setText("Offline");
@@ -345,14 +301,11 @@ void Widget::connect_to_stream()
 
     ui->viewersLabel->setText(stream_info["viewers"]);
     ui->fpsLabel->setText(stream_info["average_fps"]);
-
 }
 
 void Widget::disconnect_from_chat()
 {
-    socket->write("QUIT\r\n");
-    socket->flush();
-    socket->disconnectFromHost();
+    chat->quit();
     _log("Disconnected from chat " + currentChatName + "\n");
     ui->chatConnectedLabel->setStyleSheet("QLabel { background-color : rgb(212,212,212); color : black; font: 10pt \"MS Shell Dlg 2\"; }");
     ui->chatConnectedLabel->setText("Disconnected");
@@ -362,10 +315,170 @@ void Widget::disconnect_from_chat()
 
 void Widget::disconnect_from_stream()
 {
-    _log("Disconnected from stream " + currentStreamName + "\n");
+    //_log("Disconnected from stream " + currentStreamName + "\n");
     ui->streamOnlineLabel->setText("Offline");
     ui->streamOnlineLabel->setStyleSheet("QLabel { background-color : rgb(212,212,212); color : black; font: 10pt \"MS Shell Dlg 2\"; }");
     streamConnected = false;
     streamInfoTimer->stop();
 }
 
+void Widget::onNewChatMsg(const IRCMsgParser::IRCMsg & msg)
+{
+    if (msg.type == IRCMsgParser::WELCOME) {
+
+        _log("Connected to " + ui->channelEdit->text() + "'s chat succesfully!\n", Qt::green);
+        ui->chatConnectedLabel->setStyleSheet("QLabel { background-color : rgb(0,255,0); color : blue; font: 10pt \"MS Shell Dlg 2\"; }");
+        ui->chatConnectedLabel->setText("Connected");
+        chatConnected = true;
+        if (ui->channelEdit->text() != currentChatName) {
+            ui->chat->clear();
+        }
+        currentChatName = ui->channelEdit->text();
+        ui->chatBox->setTitle("Chat (Connected to " + currentChatName + ")");
+
+    } else if (msg.type == IRCMsgParser::ERR_AUTH_TOKEN) {
+        _log("Login unsuccessful. Possibly wrong oauth token.\n", Qt::red);
+    } else if (msg.type == IRCMsgParser::ERR_LOGIN) {
+        _log("Login unsuccesfull. Probably wrong username or channel name.\n", Qt::red);
+    }
+
+    if (msg.type == IRCMsgParser::JOIN) {
+        //socket->write(QString("PRIVMSG #" + ui->channelEdit->text() + " :" + msg.sender + ", SwiftRage / HELLO!\r\n").toLatin1());
+    }
+    if (msg.type == IRCMsgParser::PRIVMSG) {
+
+        IRCMsgParser::IRCMsg msg_no_newline = msg;
+        msg_no_newline.text = QString(msg.text).remove("\r\n");
+
+        _chat(msg.sender + ": " + msg_no_newline.text);
+        bot->parseNewMsg(msg_no_newline);
+
+    }
+}
+
+void Widget::onNewBotMsg(const QString & msg)
+{
+    qDebug() << msg;
+    chat->sendToChat(msg);
+}
+
+void Widget::on_authTokenEdit_editingFinished()
+{
+    TwitchAPI::instance().set_auth_token(ui->authTokenEdit->text());
+}
+
+void Widget::on_customCommandsTable_clicked(const QModelIndex &index)
+{
+    if (index.column() == 1) {
+
+        QString cmd = ui->customCommandsTable->item(index.row(), 0)->text();
+
+        if (ui->customCommandsTable->item(index.row(), index.column())->text() == "On") {
+            CUSTOM_COMMANDS_SETTINGS[cmd]["IsOn"] = "false";
+            ui->customCommandsTable->item(index.row(), index.column())->setText("Off");
+            ui->customCommandsTable->item(index.row(), index.column())->setTextColor(QColor(Qt::black));
+            ui->customCommandsTable->item(index.row(), index.column())->setBackgroundColor(QColor(212,212,212));
+        } else {
+            CUSTOM_COMMANDS_SETTINGS[cmd]["IsOn"] = "true";
+            ui->customCommandsTable->item(index.row(), index.column())->setText("On");
+            ui->customCommandsTable->item(index.row(), index.column())->setTextColor(QColor(Qt::blue));
+            ui->customCommandsTable->item(index.row(), index.column())->setBackgroundColor(QColor(Qt::green));
+        }
+
+        bot->update_single_cmd_settings(cmd);
+
+    }
+}
+
+void Widget::on_pushButton_2_clicked()
+{
+    add_row_to_table(ui->customCommandsTable, "", "false", "5000", "");
+    ui->customCommandsTable->editItem(ui->customCommandsTable->item(0,0));
+}
+
+void Widget::add_row_to_table(QTableWidget * table, const QString & command, const QString & isOn, const QString & minDelayMsec, const QString & message)
+{
+    qDebug() << minDelayMsec;
+    table->insertRow(0);
+
+    QTableWidgetItem * itemCmd = new QTableWidgetItem(command);
+    table->setItem(0, 0, itemCmd);
+
+    QTableWidgetItem * itemIsOn = new QTableWidgetItem("");
+    if (isOn == "true") {
+        itemIsOn->setText("On");
+        itemIsOn->setTextColor(QColor(Qt::blue));
+        itemIsOn->setBackgroundColor(QColor(Qt::green));
+    } else {
+        itemIsOn->setText("Off");
+        itemIsOn->setTextColor(QColor(Qt::black));
+        itemIsOn->setBackgroundColor(QColor(212,212,212));
+    }
+
+    Qt::ItemFlags eFlags = itemIsOn->flags();
+    eFlags &= ~Qt::ItemIsEditable;
+    itemIsOn->setFlags(eFlags);
+    itemIsOn->setTextAlignment(Qt::AlignCenter);
+    table->setItem(0, 1, itemIsOn);
+
+    QTableWidgetItem * itemDelay = new QTableWidgetItem(minDelayMsec);
+    table->setItem(0, 2, itemDelay);
+
+    if (table == ui->customCommandsTable) {
+        QTableWidgetItem * itemMsg = new QTableWidgetItem(message);
+        table->setItem(0, 3, itemMsg);
+    }
+}
+
+void Widget::on_sendStopAnnouncementButton_clicked()
+{
+    if ((ui->sendStopAnnouncementButton->text() == "Send") && (ui->announcementTextEdit->toPlainText() != "")) {
+        if (!ui->repeatAnnouncementCheckBox->isChecked()) {
+            chat->sendToChat(ui->announcementTextEdit->toPlainText());
+        } else {
+            if (ui->announcementRepeatTime->text().toInt() == 0) {
+                _log("Please set announcement repeat time.");
+            } else {
+                bot->start_repeating_message(ui->announcementTextEdit->toPlainText(), ui->announcementRepeatTime->text().toInt());
+                ui->sendStopAnnouncementButton->setText("Stop");
+            }
+        }
+
+    } else {
+
+        bot->stop_repeating_message();
+        ui->sendStopAnnouncementButton->setText("Send");
+    }
+}
+
+void Widget::on_greetNewSubCheckBox_stateChanged(int state)
+{
+    bot->set_subs_greeting_state(state);
+}
+
+void Widget::on_greetingMsgTextEdit_textChanged()
+{
+    bot->set_subs_greeting_msg(ui->greetingMsgTextEdit->toPlainText());
+}
+
+void Widget::on_customCommandsTable_cellChanged(int row, int column)
+{
+    QString cmd = ui->customCommandsTable->item(row, 0)->text();
+
+    if (column == 0) {
+        // ...
+    }
+
+    if (column == 2) {
+        CUSTOM_COMMANDS_SETTINGS[cmd]["MinDelayMsec"] = ui->customCommandsTable->item(row, column)->text();
+    }
+
+    if (column == 3) {
+        CUSTOM_COMMANDS_SETTINGS[cmd]["Message"] = ui->customCommandsTable->item(row, column)->text();
+    }
+}
+
+void Widget::on_greetNewSubCheckBox_clicked()
+{
+    bot->set_subs_greeting_state(ui->greetNewSubCheckBox->isChecked());
+}

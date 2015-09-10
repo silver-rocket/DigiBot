@@ -19,11 +19,22 @@ TEMPLATE = app
 SOURCES += main.cpp\
     ircmsgparser.cpp \
     widget.cpp \
-    simplexmlreadwrite.cpp
+    simplexmlreadwrite.cpp \
+    twitchapi.cpp \
+    chatengine.cpp \
+    botengine.cpp \
+    random.cpp \
+    settings.cpp
+
 
 HEADERS  += widget.h \
     ircmsgparser.h \
-    simplexmlreadwrite.h
+    simplexmlreadwrite.h \
+    twitchapi.h \
+    chatengine.h \
+    botengine.h \
+    random.h \
+    settings.h
 
 FORMS    += widget.ui
 

@@ -3,6 +3,7 @@
         <file>reload.png</file>
         <file>DansGame.png</file>
         <file>save.png</file>
+        <file>question_mark.png</file>
     </qresource>
     <qresource prefix="/data">
         <file>Answers.txt</file>

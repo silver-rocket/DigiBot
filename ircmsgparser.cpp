@@ -16,6 +16,26 @@ IRCMsgParser::IRCMsg IRCMsgParser::parse(QString string) {
 
     ret_msg.type = IRCMsgParser::UNSUPPORTED;
 
+    // System messages //
+
+    if (string.contains("Welcome, GLHF")) {
+
+        ret_msg.type = IRCMsgParser::WELCOME;
+        return ret_msg;
+
+    } else if (string.contains("Login unsuccessful")) {
+
+        ret_msg.type = IRCMsgParser::ERR_AUTH_TOKEN;
+        return ret_msg;
+
+    } else if (string.contains("Error logging in")) {
+
+        ret_msg.type = IRCMsgParser::ERR_LOGIN;
+        return ret_msg;
+    }
+
+    // User related messages //
+
     QRegExp regex_action(":(.+)\!.+tv (.+) #(.+)"); // join, part or msg
 
     QRegExp regex_ping("PING :(.+)");
@@ -58,5 +78,4 @@ IRCMsgParser::IRCMsg IRCMsgParser::parse(QString string) {
     }
 
     return ret_msg;
-
 }
