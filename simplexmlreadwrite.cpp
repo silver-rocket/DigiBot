@@ -119,5 +119,7 @@ bool SimpleXMLReadWrite::writeIerarchy(const QMap<QString, QMap<QString, QString
     stream.writeEndDocument();
 
     file.close();
+
+    return true;
 }
 
