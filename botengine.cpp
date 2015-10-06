@@ -226,9 +226,11 @@ void BotEngine::showStreamDelay(const IRCMsgParser::IRCMsg & msg)
 void BotEngine::showFollowTime(const IRCMsgParser::IRCMsg & msg)
 {
     /* hrs = yrs, mins = months, secs = days */
+    /* because Qt does not allows #yrs == 0  */
     QTime time_followed = TwitchAPI::instance().getFollowTime(msg.sender, cur_channel);
     if (time_followed != QTime()) {
-        QString msg_out = QString("%1 is following this channel for%3%4%5").arg(msg.sender)
+        QString msg_out = QString("%1 is following %2 for%3%4%5").arg(msg.sender)
+                .arg("this channel")
                 .arg(time_followed.hour()==0?"":" "+QString::number(time_followed.hour())+"y")
                 .arg(time_followed.minute()==0?"":" "+QString::number(time_followed.minute())+"m")
                 .arg(time_followed.second()==0?"":" "+QString::number(time_followed.second())+"d");
