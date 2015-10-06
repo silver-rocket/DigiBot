@@ -13,10 +13,18 @@ ChatEngine::~ChatEngine()
 
 bool ChatEngine::join(const QString & auth_token, const QString & nick, const QString channel)
 {
+
     socket->connectToHost(QString("irc.twitch.tv"), 6667);
     socket->write("PASS oauth:" + auth_token.toUtf8() + "\r\n");
     socket->write("NICK " + nick.toUtf8() + "\r\n");
     socket->write("JOIN #" + channel.toUtf8() + "\r\n");
+
+/*
+            socket->connectToHost(QString("192.16.64.180"), 6667);
+            socket->write("PASS oauth:" + auth_token.toUtf8() + "\r\n");
+            socket->write("NICK " + nick.toUtf8() + "\r\n");
+            socket->write("JOIN #_thelakmus_1440494034233\r\n");
+*/
 
     cur_channel = channel;
 
@@ -40,6 +48,8 @@ bool ChatEngine::sendToChat(const QString & msg)
 void ChatEngine::readyRead()
 {
     QString line = socket->readLine();
+
+    //qDebug() << line;
 
     IRCMsgParser::IRCMsg msg = IRCMsgParser::parse(line);
 

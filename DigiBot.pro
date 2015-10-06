@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
-QT       += webkit webkitwidgets
+QT       += webkit
 QT       += network
 
 CONFIG += c++11
@@ -39,4 +39,4 @@ HEADERS  += widget.h \
 FORMS    += widget.ui
 
 RESOURCES += \
-    resources.qrc
+    app.qrc

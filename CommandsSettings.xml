@@ -12,4 +12,8 @@
         <IsOn>true</IsOn>
         <MinDelayMsec>5000</MinDelayMsec>
     </delay>
+    <followtime>
+        <IsOn>true</IsOn>
+        <MinDelayMsec>3000</MinDelayMsec>
+    </followtime>
 </Settings>

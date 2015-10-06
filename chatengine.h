@@ -25,6 +25,10 @@ public:
 
     bool sendToChat(const QString & msg);
 
+    void enableWhispers() {
+        socket->write(QString("CAP REQ :twitch.tv/commands\r\n").toLatin1());
+    }
+
 private:
     QTcpSocket * socket;
 

@@ -71,23 +71,26 @@ public:
 
 private:
 
+
     void processTwitchNotifyMsg(const IRCMsgParser::IRCMsg & msg);
 
     void showSubGreetingMsg(const IRCMsgParser::IRCMsg & msg);
+
+    QString get_command(const QString & text);
 
     QString processCustomMessage(const IRCMsgParser::IRCMsg & msg);
 
     void showCustomMessage(const IRCMsgParser::IRCMsg & msg);
 
+    /* Build-in Commands */
+
     void showDongSize(const IRCMsgParser::IRCMsg & msg);
-
-    QString get_command(const QString & text);
-
-public:
 
     void showUptime(const IRCMsgParser::IRCMsg & msg);
 
     void showStreamDelay(const IRCMsgParser::IRCMsg & msg);
+
+    void showFollowTime(const IRCMsgParser::IRCMsg & msg);
 
 signals:
 

@@ -114,6 +114,7 @@ private slots:
     void on_greetingMsgTextEdit_textChanged();
     void on_customCommandsTable_cellChanged(int row, int column);
     void on_greetNewSubCheckBox_clicked();
+    void on_pushButton_3_clicked();
 };
 
 #endif // WIDGET_H

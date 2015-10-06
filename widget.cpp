@@ -1,7 +1,7 @@
 #include "widget.h"
 #include "ui_widget.h"
 
-const QString Widget::mainWindowTitle = "Digibot v 1.0.0";
+const QString Widget::mainWindowTitle = "Digibot v 1.0.1";
 const QString Widget::appID = "jv1zuv3ifjgbt45ubipfk1ng7khpnhi";
 const QString Widget::settingsFile = "DigiBotSettings.xml";
 const QString Widget::commandsSettingsFile = "CommandsSettings.xml";
@@ -127,7 +127,9 @@ void Widget::load_custom_commands_settings()
 
 void Widget::load_QA()
 {
-    QFile file(":/data/Answers.txt");
+    /* Deprecated */
+
+    QFile file("");
 
     if (!file.open(QIODevice::ReadOnly)) {
         QMessageBox::warning(this, "Error", "Can't open QA database");
@@ -136,12 +138,12 @@ void Widget::load_QA()
 
     QTextStream stream(&file);
 
-    stream.setCodec("cp-1251"); // russian support
+    stream.setCodec("cp-1251"); // rus support
 
     while(!stream.atEnd())
     {
         QString line = stream.readLine();
-        QRegExp regex("(.+) : (.+)");
+        QRegExp regex("(.+): (.+)");
 
         bool match = regex.exactMatch(line);
 
@@ -289,8 +291,6 @@ void Widget::connect_to_stream()
         _log("Connected to " + ui->channelEdit->text().toUtf8() +  " stream!", Qt::green);
         streamInfoTimer->start(streamInfoTimerTimeout);
         streamConnected = true;
-        currentStreamName = ui->channelEdit->text();
-        bot->set_cur_channel(currentStreamName); // .join channel
     } else {
         _log("Stream " + ui->channelEdit->text().toUtf8() + " is currently offline.", Qt::yellow);
         ui->streamOnlineLabel->setText("Offline");
@@ -298,6 +298,8 @@ void Widget::connect_to_stream()
         streamInfoTimer->stop();
         streamConnected = false;
     }
+    currentStreamName = ui->channelEdit->text();\
+    bot->set_cur_channel(currentStreamName);
 
     ui->viewersLabel->setText(stream_info["viewers"]);
     ui->fpsLabel->setText(stream_info["average_fps"]);
@@ -398,7 +400,7 @@ void Widget::on_pushButton_2_clicked()
 
 void Widget::add_row_to_table(QTableWidget * table, const QString & command, const QString & isOn, const QString & minDelayMsec, const QString & message)
 {
-    qDebug() << minDelayMsec;
+    //qDebug() << minDelayMsec;
     table->insertRow(0);
 
     QTableWidgetItem * itemCmd = new QTableWidgetItem(command);
@@ -481,4 +483,10 @@ void Widget::on_customCommandsTable_cellChanged(int row, int column)
 void Widget::on_greetNewSubCheckBox_clicked()
 {
     bot->set_subs_greeting_state(ui->greetNewSubCheckBox->isChecked());
+}
+
+void Widget::on_pushButton_3_clicked()
+{
+    //chat->enableWhispers();
+    //chat->sendToChat("/w Inferna1e 123");
 }

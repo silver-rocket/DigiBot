@@ -6,6 +6,7 @@ BotEngine::BotEngine(QObject *parent)
     commandList["dong"].fn_ptr = &BotEngine::showDongSize;
     commandList["up"].fn_ptr = &BotEngine::showUptime;
     commandList["delay"].fn_ptr = &BotEngine::showStreamDelay;
+    commandList["followtime"].fn_ptr = &BotEngine::showFollowTime;
 
     for (QMap<QString, CommandInfo>::iterator it = commandList.begin(); it != commandList.end(); ++it) {
 
@@ -62,7 +63,7 @@ void BotEngine::update_single_cmd_settings(const QString & command)
 
     if (single_command_settings["IsOn"] != "") {
         int ison = single_command_settings["IsOn"] == "true" ? 1 : 0;
-        qDebug() << command << ' ' << ison;
+        //qDebug() << command << ' ' << ison;
         if (ok)
             commandList[command].isOn = ison;
     }
@@ -128,6 +129,13 @@ void BotEngine::parseNewMsg(const IRCMsgParser::IRCMsg & msg)
         processTwitchNotifyMsg(msg);
     }
 
+}
+
+QString BotEngine::get_command(const QString & text)
+{
+    QString cmd = text;
+    cmd.remove(0, 1);
+    return cmd.section(" ", 0, 0);
 }
 
 void BotEngine::processTwitchNotifyMsg(const IRCMsgParser::IRCMsg & msg)
@@ -201,13 +209,6 @@ void BotEngine::showDongSize(const IRCMsgParser::IRCMsg & msg)
     emit botMessageReady(out_string);
 }
 
-QString BotEngine::get_command(const QString & text)
-{
-    QString cmd = text;
-    cmd.remove(0, 1);
-    return cmd.section(" ", 0, 0);
-}
-
 void BotEngine::showUptime(const IRCMsgParser::IRCMsg & msg)
 {
     QTime uptime = TwitchAPI::instance().getStreamUptime(cur_channel);
@@ -220,6 +221,19 @@ void BotEngine::showStreamDelay(const IRCMsgParser::IRCMsg & msg)
     int delay = TwitchAPI::instance().getStreamDelay(cur_channel);
     if (delay != -1)
         emit botMessageReady("Delay: " + QString::number(delay/60) + "min");
+}
+
+void BotEngine::showFollowTime(const IRCMsgParser::IRCMsg & msg)
+{
+    /* hrs = yrs, mins = months, secs = days */
+    QTime time_followed = TwitchAPI::instance().getFollowTime(msg.sender, cur_channel);
+    if (time_followed != QTime()) {
+        QString msg_out = QString("%1 is following this channel for%3%4%5").arg(msg.sender)
+                .arg(time_followed.hour()==0?"":" "+QString::number(time_followed.hour())+"y")
+                .arg(time_followed.minute()==0?"":" "+QString::number(time_followed.minute())+"m")
+                .arg(time_followed.second()==0?"":" "+QString::number(time_followed.second())+"d");
+        emit botMessageReady(msg_out);
+    }
 }
 
 void BotEngine::onRepeatTimerTimeout()

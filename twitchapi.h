@@ -31,6 +31,8 @@ private:
 
     explicit TwitchAPI(QWidget *parent = 0): QWidget(parent) {}
 
+    TwitchAPI(const TwitchAPI& r);
+
     QByteArray GET(QUrl u) {
         QNetworkAccessManager* manager = new QNetworkAccessManager(this);
 
@@ -57,6 +59,8 @@ public:
     QMap<QString, QString> getStreamInfo(const QString & channel);
 
     QTime getStreamUptime(const QString & channel);
+
+    QTime getFollowTime(const QString & user, const QString & channel);
 
     int getStreamDelay(const QString & channel);
 
