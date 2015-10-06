@@ -19,8 +19,8 @@
    <string>Widget</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
-    <normaloff>:/pic/DansGame.png</normaloff>:/pic/DansGame.png</iconset>
+   <iconset resource="app.qrc">
+    <normaloff>:/media/media/DansGame.png</normaloff>:/media/media/DansGame.png</iconset>
   </property>
   <widget class="QGroupBox" name="logBox">
    <property name="geometry">
@@ -166,8 +166,8 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
      <string/>
     </property>
     <property name="icon">
-     <iconset resource="resources.qrc">
-      <normaloff>:/pic/reload.png</normaloff>:/pic/reload.png</iconset>
+     <iconset resource="app.qrc">
+      <normaloff>:/media/media/reload.png</normaloff>:/media/media/reload.png</iconset>
     </property>
    </widget>
   </widget>
@@ -246,7 +246,7 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -406,14 +406,14 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
        </rect>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Save Log In Settings&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
        <string/>
       </property>
       <property name="icon">
-       <iconset resource="resources.qrc">
-        <normaloff>:/pic/save.png</normaloff>:/pic/save.png</iconset>
+       <iconset resource="app.qrc">
+        <normaloff>:/media/media/save.png</normaloff>:/media/media/save.png</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -604,7 +604,7 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
        </rect>
       </property>
       <property name="text">
-       <string>Send</string>
+       <string>Start</string>
       </property>
      </widget>
      <widget class="QSpinBox" name="announcementRepeatTime">
@@ -647,6 +647,19 @@ font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
        <width>171</width>
        <height>141</height>
       </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_3">
+     <property name="geometry">
+      <rect>
+       <x>50</x>
+       <y>40</y>
+       <width>111</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>PushButton</string>
      </property>
     </widget>
    </widget>
@@ -768,7 +781,7 @@ p, li { white-space: pre-wrap; }
     <enum>Qt::AutoText</enum>
    </property>
    <property name="pixmap">
-    <pixmap resource="resources.qrc">:/pic/question_mark.png</pixmap>
+    <pixmap resource="app.qrc">:/media/media/question_mark.png</pixmap>
    </property>
    <property name="scaledContents">
     <bool>true</bool>
@@ -803,7 +816,7 @@ p, li { white-space: pre-wrap; }
   <tabstop>greetingMsgTextEdit</tabstop>
  </tabstops>
  <resources>
-  <include location="resources.qrc"/>
+  <include location="app.qrc"/>
  </resources>
  <connections/>
 </ui>

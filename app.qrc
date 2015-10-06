@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/media">
+        <file>media/DansGame.png</file>
+        <file>media/question_mark.png</file>
+        <file>media/reload.png</file>
+        <file>media/save.png</file>
+    </qresource>
+    <qresource prefix="/data">
+        <file>data/BotDictionary.txt</file>
+    </qresource>
+</RCC>

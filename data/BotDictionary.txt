@@ -1,0 +1,4 @@
+(hi|hello|hey)=(hi|hi there|hey|hello)
+(what&you&age)|(how&old&you)=(0xFF-0xE8)
+(test|test)=(response_1)
+(test&test)=(response_2)
